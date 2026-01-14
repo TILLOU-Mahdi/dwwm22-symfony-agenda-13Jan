@@ -6,8 +6,12 @@ use App\Repository\ContactRepository;
 use Doctrine\DBAL\Types\Types;
 use Doctrine\ORM\Mapping as ORM;
 use Symfony\Component\Validator\Constraints as Assert;
+use Symfony\Bridge\Doctrine\Validator\Constraints\UniqueEntity;
 
 
+
+#[UniqueEntity('email', message: "Cet email appartient dejà à l'un de vos contacts.")]
+#[UniqueEntity('phone', message: "Ce numéro de téléphone appartient dejà à l'un de vos contacts.")]
 #[ORM\Entity(repositoryClass: ContactRepository::class)]
 class Contact
 {

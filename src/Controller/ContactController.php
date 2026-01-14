@@ -4,6 +4,8 @@ namespace App\Controller;
 
 use App\Entity\Contact;
 use App\Form\ContactFormType;
+use App\Repository\ContactRepository;
+use Doctrine\ORM\EntityManagerInterface;
 use Symfony\Component\HttpFoundation\Request;
 use Symfony\Component\HttpFoundation\Response;
 use Symfony\Component\Routing\Attribute\Route;
@@ -12,15 +14,17 @@ use Symfony\Bundle\FrameworkBundle\Controller\AbstractController;
 final class ContactController extends AbstractController
 {
     #[Route('/', name: 'app_contact_index', methods: ['GET'])]
-    public function index(): Response
-    {
+    public function index(ContactRepository $contactRepository): Response {
+
+        $contacts = $contactRepository->findAll();
+        
         return $this->render('contact/index.html.twig', [
-            'controller_name' => 'ContactController',
+            'contacts' => $contacts 
         ]);
     }
 
     #[route('/contact/create', name: 'app_contact_create', methods: ['GET', 'POST'])]
-    public function create(Request $request): Response {
+    public function create(Request $request, EntityManagerInterface $entityManager): Response {
         //1. Créer le contact à insérer enbase de données
         $contact = new Contact();
 
@@ -35,12 +39,15 @@ final class ContactController extends AbstractController
         if ($form->isSubmitted() && $form->isValid()) {
 
             //6. alors, insérer le nouveau contact en base de données
-            dd('pause');
+              $entityManager->persist($contact); // Préparer la requête d'insertion des informations en base de données
+            $entityManager->flush(); // Exécuter la requête
 
             //7.Générer le msg flash de succès de l'opération
+                  $this->addFlash('success', 'Le contact a été ajouté à la liste.');
 
             //8.Effectuer une redirection vers la page d'accueil
                 //puis, arrêter l'exécution du script
+                   return $this->redirectToRoute('app_contact_index');
         }
             
 
