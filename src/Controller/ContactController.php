@@ -55,11 +55,25 @@ final class ContactController extends AbstractController
 
 
 
+
         //3. Passer la partie visible du formulaire à la vue pour l'affichage
        return $this->render('contact/create.html.twig', [
         "form" => $form->createView()
        ]);
     }
+
+
+    #[Route('/contact/show/{id}', name: 'app_contact_show', methods: ['GET'])]
+    public function show(Contact $contact): Response {
+
+    return $this->render('contact/show.html.twig', [
+        "contact" => $contact
+     ]);
+    }
+
+
+
+
 
     #[Route('/contact/edit/{id}', name: 'app_contact_edit', methods:['GET', 'POST'])]
     public function edit(Contact $contact, Request $request, EntityManagerInterface $entityManager): Response {
