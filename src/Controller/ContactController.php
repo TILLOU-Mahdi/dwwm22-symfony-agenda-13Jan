@@ -16,8 +16,10 @@ final class ContactController extends AbstractController
     #[Route('/', name: 'app_contact_index', methods: ['GET'])]
     public function index(ContactRepository $contactRepository): Response {
 
+    // 1. La méthode findAll() permet de récupérer la liste de tous les contacts de la base de données sous forme de tableau
         $contacts = $contactRepository->findAll();
         
+    // 2. Passer le tableau des contacts à la vue pour affichage
         return $this->render('contact/index.html.twig', [
             'contacts' => $contacts 
         ]);
@@ -57,5 +59,39 @@ final class ContactController extends AbstractController
        return $this->render('contact/create.html.twig', [
         "form" => $form->createView()
        ]);
+    }
+
+    #[Route('/contact/edit/{id}', name: 'app_contact_edit', methods:['GET', 'POST'])]
+    public function edit(Contact $contact, Request $request, EntityManagerInterface $entityManager): Response {
+
+        // 1. Une fois que le contact à modifier est récupéré,
+        // 2. Créer le formulaire de modification qui lui est associé.
+        $form = $this->createForm(ContactFormType::class, $contact);
+
+        // 4. Associer au formulaire, les données de la requête
+            $form->handleRequest($request);
+
+        // 5. si le formulaire est soumis et valide
+        if ($form->isSubmitted() && $form->isValid()) {
+
+        // 6. Alors, effectuer la requête de modification du contact en base de données
+            $entityManager->persist($contact);
+            $entityManager->flush();
+
+                    // 7. Générer le message flash de succès de l'opération
+                        $this->addFlash("success", "Le contact a été modifié");
+
+                    //8. Effectuer une redirection vers la route menant à la page d'accueil
+                            // Puis, arrêter l'excécution du script
+                        return $this->redirectToRoute('app_contact_index');
+
+        }
+           
+
+        // 3. Passer la partie visible du formulaire à la vue, pour affichage
+        return $this->render('contact/edit.html.twig', [
+            "form" => $form->createView(),
+            "contact" => $contact
+        ]);
     }
 }
